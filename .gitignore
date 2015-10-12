@@ -2,3 +2,4 @@
 treeTest 
 *.csv
 *.o
+*.out
