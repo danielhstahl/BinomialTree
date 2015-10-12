@@ -1,2 +1,2 @@
-g++ -O3 -std=c++11 main.cpp Tree.cpp -o treeTest
+g++ -O3 -std=c++11 main.cpp Tree.cpp Date.cpp -o treeTest
 
