@@ -50,23 +50,25 @@ auto execute(auto& alpha,  auto& sigma,  auto& fInv, auto& payoff, auto& discoun
    // int numberOfPChanged=0;
     double sqrtDt=sqrt(dt);
     for(int i=0; i<mm; i++){
-        auto underlyingX=fInv(t, x0+sqrtDt*(mm-1-2*i), dt, mm);
+        Number underlyingX=fInv(t, x0+sqrtDt*(mm-1-2*i), dt, mm);
         optionPrice[i]=payoff(t, underlyingX, dt, mm);
+        //optionPrice.push_back(payoff(t, underlyingX, dt, mm));
+       
     }
     mm--;
     for(int j=(m-2); j>=0; j--){
         t=j*dt;
         for(int i=0; i<mm; i++){
-            auto underlyingX=fInv(t, x0+sqrtDt*(mm-1-2*i), dt, mm);
+            Number underlyingX=fInv(t, x0+sqrtDt*(mm-1-2*i), dt, mm);
             auto alph=alpha(t, underlyingX, dt, mm);
             auto sig=sigma(t, underlyingX, dt, mm);
             auto p=(alph-sig*.5)*.5*sqrtDt+.5;
-            if(p>1){
-                p=1;
+            if(p>1.0){
+                p=1.0;
                 //numberOfPChanged++;
             }
-            else if(p<0){
-                p=0;
+            else if(p<0.0){
+                p=0.0;
                 //numberOfPChanged++;
             }
             optionPrice[i]=(p*optionPrice[i]+(1-p)*optionPrice[i+1])*discount(t, underlyingX, dt, mm);
