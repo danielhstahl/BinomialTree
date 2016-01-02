@@ -1,6 +1,6 @@
 //template< typename ALPHA, typename SIGMA, typename FINV, typename PAYOFF, typename DISCOUNT>
 template<typename Number>
-auto execute(auto& alpha,  auto& sigma,  auto& fInv, auto& payoff, auto& discount, int m, double t, const Number& x0, std::unordered_map<int, bool>& exerciseNodes){ //alpha=alpha/sigma,sigma=sigma'(x), finv=the inverse of the function g=\int 1/sig(x) dx
+auto computeTree(auto& alpha,  auto& sigma,  auto& fInv, auto& payoff, auto& discount, int m, double t, const Number& x0, std::unordered_map<int, bool>& exerciseNodes){ //alpha=alpha/sigma,sigma=sigma'(x), finv=the inverse of the function g=\int 1/sig(x) dx
     //double t=(m-1)*dt;
     double dt=t/(m-1);
     std::vector<Number> optionPrice(m);
@@ -43,7 +43,7 @@ auto execute(auto& alpha,  auto& sigma,  auto& fInv, auto& payoff, auto& discoun
 }
 
 template<typename Number> //american option
-auto execute(auto& alpha,  auto& sigma,  auto& fInv, auto& payoff, auto& discount, int m, double t, const Number& x0){ //alpha=alpha/sigma,sigma=sigma'(x), finv=the inverse of the function g=\int 1/sig(x) dx
+auto computeTree(auto& alpha,  auto& sigma,  auto& fInv, auto& payoff, auto& discount, int m, double t, const Number& x0){ //alpha=alpha/sigma,sigma=sigma'(x), finv=the inverse of the function g=\int 1/sig(x) dx
     double dt=t/(m-1);
     std::vector<Number> optionPrice(m);
     int mm=m;
@@ -51,9 +51,7 @@ auto execute(auto& alpha,  auto& sigma,  auto& fInv, auto& payoff, auto& discoun
     double sqrtDt=sqrt(dt);
     for(int i=0; i<mm; i++){
         Number underlyingX=fInv(t, x0+sqrtDt*(mm-1-2*i), dt, mm);
-        optionPrice[i]=payoff(t, underlyingX, dt, mm);
-        //optionPrice.push_back(payoff(t, underlyingX, dt, mm));
-       
+        optionPrice[i]=payoff(t, underlyingX, dt, mm);       
     }
     mm--;
     for(int j=(m-2); j>=0; j--){

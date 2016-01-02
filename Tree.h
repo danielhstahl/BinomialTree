@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <vector>
 template<typename Number>
-auto execute(
+auto computeTree(
     auto&,  //function(t, x) for the drift ->alpha=alpha/sigma
     auto&,  //function(t, x) for the volatility->sigma=sigma'(x)
     auto&, //inverse of the function g=\int 1/sig(x) dx
@@ -17,7 +17,7 @@ auto execute(
     std::unordered_map<int, bool>& //nodes to exercise at
 ); 
 template<typename Number>
-auto execute(
+auto computeTree(
     auto&,  //function(t, x) for the drift ->alpha=alpha/sigma
     auto&,  //function(t, x) for the volatility->sigma=sigma'(x)
     auto&, //inverse of the function g=\int 1/sig(x) dx
