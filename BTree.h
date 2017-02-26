@@ -1,7 +1,6 @@
 #ifndef __BTREE_H_INCLUDED__
 #define __BTREE_H_INCLUDED__
-
-
+#include "FunctionalUtilities.h"
 
 
 namespace btree{
