@@ -17,14 +17,12 @@ before_install:
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
   - g++ -v
   - eval "${MATRIX_EVAL}"
+  - cd ..
   - git clone https://github.com/phillyfan1138/FunctionalUtilities
-  - mkdir project
-  - cd project
-    #- g++ --version
+  - cd BinomialTree
 script:
   - make
   - ./test
 
 after_success:
-  #- ./cleantest.sh
   - bash <(curl -s https://codecov.io/bash) 
