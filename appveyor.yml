@@ -13,7 +13,6 @@ environment:
 
 # build configuration, i.e. Debug, Release, etc.
 configuration:
-  - Debug
   - Release
 #environment:
  # matrix:

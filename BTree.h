@@ -7,7 +7,7 @@ namespace btree{
     template<typename Number, typename Width, typename Height>
     struct Node {
         //Number AmericanPrice;
-        Number Price;
+        Number Price; 
         Width width;
         Height height;
         bool CheckExercise;

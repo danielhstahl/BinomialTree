@@ -4,3 +4,5 @@ treeTest
 *.o
 *.out
 *.a
+*.gcno
+*.gcda
