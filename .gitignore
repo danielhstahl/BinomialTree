@@ -6,3 +6,4 @@ treeTest
 *.a
 *.gcno
 *.gcda
+test
