@@ -51,8 +51,8 @@ namespace btree{
     }
 
     template<typename Node, typename DT, typename Number, typename SqrtDT, typename Alpha, typename Sigma, typename Discount, typename FINV, typename Payoff>
-    void iterateTree(
-        Node& upper, 
+    auto iterateTree(
+        Node&& upper, 
         const Node& lower, 
         const DT& dt, 
         const SqrtDT& sqrtdt, 
@@ -64,7 +64,7 @@ namespace btree{
         const Payoff& payoff
     ){
         if(upper.width==0){
-            return;
+            return upper;
         }
         upper.width--;
         upper.height--; //note that the difference in height between upper and lower is 2
@@ -81,6 +81,7 @@ namespace btree{
             discount(t, underlying, dt, upper.width)
         );
         upper.Price=upper.CheckExercise?max(upper.Price, payoff(t, underlying, dt, upper.width)):upper.Price;
+        return std::move(upper);
     }
     
 
@@ -99,29 +100,31 @@ namespace btree{
     ){
         const Number dt=maturity/numberOfTimePeriods;
         const Number sqrtdt=sqrt(dt);
-        //populate nodes
-        auto Nodes=futilities::for_each_parallel(0, numberOfTimePeriods+1, [&](const auto& index){
-            auto height=numberOfTimePeriods-2*index;
-            return Node<Number, N, N>(
-                payoff(
-                    maturity, 
-                    fInv(maturity, computeSkeleton(y0, height, sqrtdt), dt, numberOfTimePeriods),
-                    dt, 
-                    numberOfTimePeriods
-                ),
-                numberOfTimePeriods,
-                height,
-                isAmerican
-            );
-        });
-        //compute btree
-        while(Nodes.size()>1){//Nodes[0].width>0){
-            for(int i=0; i<Nodes.size()-1;++i){
-                iterateTree(Nodes[i], Nodes[i+1], dt, sqrtdt, y0, alpha, sigma, discount, fInv, payoff);
+        auto getNodes=[&](auto&& nodes){
+            return futilities::for_each_exclude_last(nodes, [&](auto&& curr, const auto& next, const auto& index){
+             return iterateTree(std::move(curr), next, dt, sqrtdt, y0, alpha, sigma, discount, fInv, payoff);
+            });
+        };
+        return futilities::recurse_move( 
+            futilities::for_each_parallel(0, numberOfTimePeriods+1, [&](const auto& index){
+                auto height=numberOfTimePeriods-2*index;
+                return Node<Number, N, N>(
+                    payoff(
+                        maturity, 
+                        fInv(maturity, computeSkeleton(y0, height, sqrtdt), dt, numberOfTimePeriods),
+                        dt, 
+                        numberOfTimePeriods
+                    ),
+                    numberOfTimePeriods,
+                    height,
+                    isAmerican
+                );
+            }),
+            getNodes,
+            [&](auto&& val){
+                return val.size()>1;
             }
-            Nodes.pop_back();
-        }
-        return Nodes[0].Price;
+        )[0].Price;
     } 
     /*by default, american*/
     template<typename Alpha, typename Sigma, typename FInv, typename Payoff, typename Discount, typename Number, typename N>
