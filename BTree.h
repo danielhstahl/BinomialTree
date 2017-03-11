@@ -140,6 +140,31 @@ namespace btree{
         return computePrice(alpha, sigma, fInv, payoff, discount, y0, numberOfTimePeriods, maturity, true);
     }
 
+    template<typename Alpha, typename Sigma, typename Finv, typename Payoff, typename Discount>
+    auto setFunctions(const Alpha& alpha, const Sigma& sigma, const Finv& fInv, const Payoff& payoff, const Discount& discount){
+        return [&](const auto& y0, const auto& numberOfTimePeriods, const auto& maturity, bool isAmerican){
+            return computePrice(alpha, sigma, fInv, payoff, discount, y0, numberOfTimePeriods, maturity, isAmerican);
+        };
+    }
+    template<typename N, typename ResultOfSetFunction>
+    auto setNumberOfPeriods(const N& numberOfTimePeriods, const ResultOfSetFunction& resultOfSetFunctions){
+        return [&](const auto& y0, const auto& maturity, bool isAmerican){
+            return resultOfSetFunctions(y0, numberOfTimePeriods, maturity, isAmerican);
+        };
+    }
+    template<typename Number, typename ResultOfSetNumberPeriods>
+    auto setCurrValue(const Number& y0, const ResultOfSetNumberPeriods& resultOfSetNumberPeriods){
+        return [&](const auto& maturity, bool isAmerican){
+            return resultOfSetNumberPeriods(y0, maturity, isAmerican);
+        };
+    }
+    template<typename Maturity, typename ResultOfSetCurrValue>
+    auto setMaturity(const Maturity& maturity, const ResultOfSetCurrValue& resultOfSetCurrValue){
+        return [&](bool isAmerican){
+            return resultOfSetCurrValue(maturity, isAmerican);
+        };
+    }
+
 }
 
 #endif

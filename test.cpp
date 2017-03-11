@@ -5,10 +5,10 @@
 #include "BlackScholes.h"
 #include <chrono>
 /*Black Scholes drift and Put payoffs */
-double alpha(double t, double x, double sig, double alph){
+double alpha(double sig, double alph){
   return alph/sig; //alpha/sigma
 }
-double sigma(double t, double x, double sig){
+double sigma(double sig){
   return sig; //sigma'(x)
 }
 double payoff(double x, double k){
@@ -19,7 +19,7 @@ double payoff(double x, double k){
     return 0;
   }
 }
-double discount(double t, double x, double dt, double r){
+double discount(double dt, double r){
   return exp(-r*dt);
 }
 double finv(double x, double sig){
@@ -51,17 +51,38 @@ TEST_CASE("Test BlackScholes", "[BTree]"){
     const double T=1;
     const double k=50;
     auto t1 = std::chrono::high_resolution_clock::now();
-    auto ApproxPrice=btree::computePrice(
-       [&](double t, double underlying, double dt, int width ){return alpha(t, underlying, sig, r);},
-       [&](double t, double underlying, double dt, int width){return sigma(t, underlying, sig);}, 
+    auto AlphaDivSigma=[&](double t, double underlying, double dt, int width ){return alpha(sig, r);};
+    auto SigmaPrime=[&](double t, double underlying, double dt, int width){return sigma(sig);};
+    auto FInv=[&](double t, double x, double dt, int width){return finv(x, sig);};
+    auto Payoff=[&](double t, double underlying, double dt, int width){return payoff(underlying, k);};
+    auto Discount=[&](double t, double underlying, double dt, int width){return discount(dt, r);};
+    auto functionsSet=btree::setFunctions(
+       AlphaDivSigma,
+       SigmaPrime,
+       FInv,
+       Payoff,
+       Discount
+    );
+    auto ApproxPrice=functionsSet(log(S0)/sig, 5000, T, false);
+    /*auto periodsSet=btree::setNumberOfPeriods(
+      5000,
+      functionsSet
+    );
+    auto currValueSet=btree::setCurrValue(log(S0)/sig, periodsSet);
+    auto maturitySet=btree::setMaturity(T, currValueSet);
+    auto ApproxPrice=maturitySet(false);*/
+    
+    /*btree::computePrice(
+       [&](double t, double underlying, double dt, int width ){return alpha(sig, r);},
+       [&](double t, double underlying, double dt, int width){return sigma(sig);}, 
        [&](double t, double x, double dt, int width){return finv(x, sig);}, 
        [&](double t, double underlying, double dt, int width){return payoff(underlying, k);}, 
-       [&](double t, double underlying, double dt, int width){return discount(t, underlying, dt, r);},
+       [&](double t, double underlying, double dt, int width){return discount(dt, r);},
        log(S0)/sig,
        5000,
        T,
        false
-    );
+    );*/
 	  auto t2 = std::chrono::high_resolution_clock::now();
     std::cout<<"It took "
     << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count()
