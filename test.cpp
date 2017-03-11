@@ -3,6 +3,7 @@
 #include "FunctionalUtilities.h"
 #include "BTree.h"
 #include "BlackScholes.h"
+#include <chrono>
 /*Black Scholes drift and Put payoffs */
 double alpha(double t, double x, double sig, double alph){
   return alph/sig; //alpha/sigma
@@ -49,7 +50,8 @@ TEST_CASE("Test BlackScholes", "[BTree]"){
     const double S0=50;
     const double T=1;
     const double k=50;
-    REQUIRE(btree::computePrice(
+    auto t1 = std::chrono::high_resolution_clock::now();
+    auto ApproxPrice=btree::computePrice(
        [&](double t, double underlying, double dt, int width ){return alpha(t, underlying, sig, r);},
        [&](double t, double underlying, double dt, int width){return sigma(t, underlying, sig);}, 
        [&](double t, double x, double dt, int width){return finv(x, sig);}, 
@@ -59,7 +61,12 @@ TEST_CASE("Test BlackScholes", "[BTree]"){
        5000,
        T,
        false
-    )==Approx(
+    );
+	  auto t2 = std::chrono::high_resolution_clock::now();
+    std::cout<<"It took "
+    << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count()
+    << " milliseconds\n";
+    REQUIRE(ApproxPrice==Approx(
         BSPut(S0, exp(-r*T), k, sig*sqrt(T))
     ).epsilon(.0001));
 }
