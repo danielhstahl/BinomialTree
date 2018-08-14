@@ -100,7 +100,8 @@ namespace btree{
     ){
         const Number dt=maturity/numberOfTimePeriods;
         const Number sqrtdt=sqrt(dt);
-        return futilities::recurse_move( 
+        return futilities::recurse_move(
+            100000000,
             futilities::for_each_parallel(0, numberOfTimePeriods+1, [&](const auto& index){
                 auto height=numberOfTimePeriods-2*index;
                 return Node<Number, N, N>(
@@ -115,7 +116,7 @@ namespace btree{
                     isAmerican
                 );
             }),
-            [&](auto&& nodes){
+            [&](auto&& nodes, const auto& index){
                 return futilities::for_each_exclude_last(nodes, [&](auto&& curr, const auto& next, const auto& index){
                     return iterateTree(std::move(curr), next, dt, sqrtdt, y0, alpha, sigma, discount, fInv, payoff);
                 });

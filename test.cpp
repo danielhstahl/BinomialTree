@@ -69,6 +69,9 @@ TEST_CASE("Test BlackScholes", "[BTree]"){
     std::cout<<"It took "
     << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count()
     << " milliseconds\n";
+
+    std::cout<<"Value: "<<ApproxPrice<<std::endl;
+    std::cout<<"Exact: "<<BSPut(S0, exp(-r*T), k, sig*sqrt(T))<<std::endl;
     REQUIRE(ApproxPrice==Approx(
         BSPut(S0, exp(-r*T), k, sig*sqrt(T))
     ).epsilon(.0001));
@@ -89,7 +92,8 @@ TEST_CASE("Test CIR", "[BTree]"){
         double BtT=2*expt/den;
         return exp(AtT-r*BtT);
     };
-    REQUIRE(btree::computePrice(
+
+    auto approxResult=btree::computePrice(
        [&](double t, double underlying, double dt, int width ){return alphaR(t, underlying, a, b, sig);},
        [&](double t, double underlying, double dt, int width){return sigmaR(t, underlying, sig);}, 
        [&](double t, double x, double dt, int width){return finvR(x, sig);}, 
@@ -99,8 +103,13 @@ TEST_CASE("Test CIR", "[BTree]"){
        5000,
        T,
        false
-    )==Approx(
-        bondcir(r, a, b,sig, T)
+    );
+    auto bondCir=bondcir(r, a, b,sig, T);
+    std::cout<<"Value: "<<approxResult<<std::endl;
+    std::cout<<"Exact: "<<bondCir<<std::endl;
+
+    REQUIRE(approxResult==Approx(
+        bondCir
     ).epsilon(.0001));
 }
 

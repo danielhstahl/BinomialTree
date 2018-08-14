@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.gcno": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "limits": "cpp"
     }
 }
